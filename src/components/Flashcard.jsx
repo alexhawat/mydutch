@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { speak } from '../utils/audio';
 
 export default function Flashcard({ word, onNext, onPrevious, currentIndex, total }) {
   const [flipped, setFlipped] = useState(false);
@@ -17,12 +18,25 @@ export default function Flashcard({ word, onNext, onPrevious, currentIndex, tota
     onPrevious();
   };
 
+  const playAudio = (text, e) => {
+    e.stopPropagation();
+    speak(text);
+  };
+
   return (
     <div className="card">
       <div className="flashcard" onClick={handleFlip}>
         {!flipped ? (
           <div className="flashcard-content">
             <div className="word">{word.dutch}</div>
+            <button
+              onClick={(e) => playAudio(word.dutch, e)}
+              className="audio-button"
+              style={{ marginTop: '16px', fontSize: '2rem', background: 'transparent', padding: '8px' }}
+              title="Play audio"
+            >
+              🔊
+            </button>
             <p style={{ color: '#718096', marginTop: '16px' }}>Click to reveal</p>
           </div>
         ) : (
@@ -32,10 +46,28 @@ export default function Flashcard({ word, onNext, onPrevious, currentIndex, tota
               <div className="pronunciation">[{word.pronunciation}]</div>
             )}
             {word.example && (
-              <p style={{ marginTop: '24px', fontSize: '1.1rem', fontStyle: 'italic', color: '#4a5568' }}>
-                "{word.example}"
-              </p>
+              <div style={{ marginTop: '24px' }}>
+                <p style={{ fontSize: '1.1rem', fontStyle: 'italic', color: '#4a5568' }}>
+                  "{word.example}"
+                </p>
+                <button
+                  onClick={(e) => playAudio(word.example, e)}
+                  className="audio-button"
+                  style={{ marginTop: '12px', fontSize: '1.5rem', background: 'transparent', padding: '4px' }}
+                  title="Play example"
+                >
+                  🔊
+                </button>
+              </div>
             )}
+            <button
+              onClick={(e) => playAudio(word.dutch, e)}
+              className="audio-button"
+              style={{ marginTop: '16px', fontSize: '1.5rem', background: 'transparent', padding: '8px' }}
+              title="Play word"
+            >
+              🔊 Play again
+            </button>
           </div>
         )}
       </div>

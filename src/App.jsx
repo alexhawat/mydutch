@@ -1,12 +1,22 @@
-import { useState } from 'react';
-import { vocabulary } from './data/vocabulary';
+import { useState, useEffect } from 'react';
+import { allVocabulary as vocabulary, getRandomWords } from './data/vocabulary';
 import CategoryView from './components/CategoryView';
 import GrammarView from './components/GrammarView';
 import ProgressTracker from './components/ProgressTracker';
+import ConversationPartner from './components/ConversationPartner';
+import Quiz from './components/Quiz';
+import { getProgress } from './utils/progress';
+import { initAudio } from './utils/audio';
 
 function App() {
-  const [view, setView] = useState('home'); // home, category, grammar, progress
+  const [view, setView] = useState('home'); // home, category, grammar, progress, conversation, quickquiz
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [stats, setStats] = useState(getProgress());
+
+  useEffect(() => {
+    initAudio();
+    setStats(getProgress());
+  }, [view]); // Refresh stats when view changes
 
   const handleCategorySelect = (categoryKey) => {
     setSelectedCategory(vocabulary[categoryKey]);
@@ -48,28 +58,69 @@ function App() {
     );
   }
 
+  // Conversation partner view
+  if (view === 'conversation') {
+    return (
+      <div className="container">
+        <h1>MyDutch 🇳🇱</h1>
+        <ConversationPartner onBack={handleBackToHome} />
+      </div>
+    );
+  }
+
+  // Quick quiz view
+  if (view === 'quickquiz') {
+    const randomWords = getRandomWords(10);
+    return (
+      <div className="container">
+        <h1>MyDutch 🇳🇱</h1>
+        <button onClick={handleBackToHome} className="back-button secondary">
+          ← Back to Main Menu
+        </button>
+        <Quiz words={randomWords} onComplete={handleBackToHome} category="Quick Quiz" />
+      </div>
+    );
+  }
+
   // Home view
   return (
     <div className="container">
       <h1>MyDutch 🇳🇱</h1>
 
-      <div className="card" style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h2>Welcome to MyDutch!</h2>
-        <p style={{ fontSize: '1.1rem', color: '#718096', marginTop: '12px' }}>
-          Your interactive Dutch language learning companion
+      <div className="card" style={{ textAlign: 'center', marginBottom: '32px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+        <h2 style={{ color: 'white' }}>Welkom bij MyDutch! 🇳🇱</h2>
+        <p style={{ fontSize: '1.2rem', marginTop: '12px', opacity: 0.95 }}>
+          A2 Inburgering Preparation
         </p>
-        <p style={{ color: '#667eea', marginTop: '16px', fontWeight: '600' }}>
-          Choose a category below to start learning
-        </p>
+        <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>Level {stats.level}</div>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Your Level</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.studyStreak}🔥</div>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Day Streak</div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalXP}</div>
+            <div style={{ fontSize: '0.85rem', opacity: 0.9 }}>Total XP</div>
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions */}
       <div className="nav">
+        <button onClick={() => setView('quickquiz')} style={{ background: '#28a745' }}>
+          ⚡ Quick Quiz
+        </button>
+        <button onClick={() => setView('conversation')}>
+          💬 Chat Partner
+        </button>
         <button onClick={() => setView('grammar')}>
-          📖 Grammar Lessons
+          📖 Grammar
         </button>
         <button onClick={() => setView('progress')} className="secondary">
-          📊 My Progress
+          📊 Progress
         </button>
       </div>
 
