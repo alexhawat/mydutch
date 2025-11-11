@@ -1,16 +1,65 @@
-// Progress tracking utilities
+// Progress tracking utilities with backend sync
+import { contentAPI } from '../services/api';
+
 const STORAGE_KEY = 'dutchLearningStats';
 const MISTAKE_KEY = 'dutchLearningMistakes';
 const LAST_STUDY_KEY = 'dutchLastStudyDate';
+const SYNC_PENDING_KEY = 'dutchSyncPending';
 
-export const getProgress = () => {
+// Check if user is authenticated
+const isAuthenticated = () => {
+  return !!localStorage.getItem('access_token');
+};
+
+// Sync progress to backend
+const syncToBackend = async (stats) => {
+  if (!isAuthenticated()) return;
+
+  try {
+    await contentAPI.updateUserProgress(stats);
+    localStorage.removeItem(SYNC_PENDING_KEY);
+  } catch (error) {
+    console.error('Error syncing progress to backend:', error);
+    // Mark as pending sync for later
+    localStorage.setItem(SYNC_PENDING_KEY, 'true');
+  }
+};
+
+// Get progress from backend or local storage
+export const getProgress = async () => {
+  // Try to get from backend if authenticated
+  if (isAuthenticated()) {
+    try {
+      const data = await contentAPI.getUserProgress();
+
+      // If backend returns presigned URL, fetch from there
+      if (data.presigned_url) {
+        const response = await fetch(data.presigned_url);
+        if (response.ok) {
+          const backendProgress = await response.json();
+          // Save to local storage as cache
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(backendProgress));
+          return backendProgress;
+        }
+      } else if (data.level !== undefined) {
+        // Backend returned progress directly
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        return data;
+      }
+    } catch (error) {
+      console.error('Error loading progress from backend:', error);
+      // Fall through to local storage
+    }
+  }
+
+  // Fallback to local storage
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       return JSON.parse(saved);
     }
   } catch (error) {
-    console.error('Error loading progress:', error);
+    console.error('Error loading progress from local storage:', error);
   }
 
   return {
@@ -24,13 +73,18 @@ export const getProgress = () => {
     totalXP: 0,
     level: 1,
     categoriesCompleted: [],
-    achievements: []
+    achievements: [],
+    mistakes: []
   };
 };
 
 export const saveProgress = (stats) => {
   try {
+    // Save to local storage immediately
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+
+    // Sync to backend asynchronously
+    syncToBackend(stats);
   } catch (error) {
     console.error('Error saving progress:', error);
   }
@@ -119,7 +173,8 @@ export const resetProgress = () => {
     totalXP: 0,
     level: 1,
     categoriesCompleted: [],
-    achievements: []
+    achievements: [],
+    mistakes: []
   };
   saveProgress(emptyStats);
   localStorage.removeItem(LAST_STUDY_KEY);
@@ -141,6 +196,8 @@ export const getMistakes = () => {
 
 export const addMistake = (word, category, userAnswer, correctAnswer) => {
   const mistakes = getMistakes();
+  const stats = getProgress();
+
   const mistake = {
     word,
     category,
@@ -158,6 +215,11 @@ export const addMistake = (word, category, userAnswer, correctAnswer) => {
   }
 
   localStorage.setItem(MISTAKE_KEY, JSON.stringify(mistakes));
+
+  // Also update in progress stats
+  stats.mistakes = mistakes;
+  saveProgress(stats);
+
   return mistakes;
 };
 
@@ -166,11 +228,34 @@ export const markMistakeReviewed = (index) => {
   if (mistakes[index]) {
     mistakes[index].reviewed = true;
     localStorage.setItem(MISTAKE_KEY, JSON.stringify(mistakes));
+
+    // Update in progress stats
+    const stats = getProgress();
+    stats.mistakes = mistakes;
+    saveProgress(stats);
   }
   return mistakes;
 };
 
 export const clearMistakes = () => {
   localStorage.setItem(MISTAKE_KEY, JSON.stringify([]));
+  const stats = getProgress();
+  stats.mistakes = [];
+  saveProgress(stats);
   return [];
+};
+
+// Retry pending sync
+export const retryPendingSync = async () => {
+  if (localStorage.getItem(SYNC_PENDING_KEY) && isAuthenticated()) {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const stats = JSON.parse(saved);
+        await syncToBackend(stats);
+      }
+    } catch (error) {
+      console.error('Error retrying sync:', error);
+    }
+  }
 };
