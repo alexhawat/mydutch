@@ -1,33 +1,20 @@
 import { useState, useEffect } from 'react';
+import { getProgress, resetProgress as resetProgressUtil, getMistakes } from '../utils/progress';
 
 export default function ProgressTracker({ onBack }) {
-  const [stats, setStats] = useState({
-    wordsLearned: 0,
-    lessonsCompleted: 0,
-    quizzesTaken: 0,
-    accuracy: 0,
-    studyStreak: 0
-  });
+  const [stats, setStats] = useState(getProgress());
+  const [mistakes, setMistakes] = useState([]);
 
   useEffect(() => {
-    // Load stats from localStorage
-    const savedStats = localStorage.getItem('dutchLearningStats');
-    if (savedStats) {
-      setStats(JSON.parse(savedStats));
-    }
+    setStats(getProgress());
+    setMistakes(getMistakes());
   }, []);
 
-  const resetProgress = () => {
+  const handleReset = () => {
     if (window.confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-      const emptyStats = {
-        wordsLearned: 0,
-        lessonsCompleted: 0,
-        quizzesTaken: 0,
-        accuracy: 0,
-        studyStreak: 0
-      };
+      const emptyStats = resetProgressUtil();
       setStats(emptyStats);
-      localStorage.setItem('dutchLearningStats', JSON.stringify(emptyStats));
+      setMistakes([]);
     }
   };
 
@@ -45,13 +32,18 @@ export default function ProgressTracker({ onBack }) {
 
         <div className="stats">
           <div className="stat-card">
-            <div className="number">{stats.wordsLearned}</div>
-            <div className="label">Words Learned</div>
+            <div className="number">{stats.level}</div>
+            <div className="label">Level</div>
           </div>
 
           <div className="stat-card">
-            <div className="number">{stats.lessonsCompleted}</div>
-            <div className="label">Lessons Completed</div>
+            <div className="number">{stats.totalXP}</div>
+            <div className="label">Total XP</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="number">{stats.studyStreak}🔥</div>
+            <div className="label">Day Streak</div>
           </div>
 
           <div className="stat-card">
@@ -61,14 +53,56 @@ export default function ProgressTracker({ onBack }) {
 
           <div className="stat-card">
             <div className="number">{stats.accuracy}%</div>
-            <div className="label">Average Accuracy</div>
+            <div className="label">Accuracy</div>
           </div>
 
           <div className="stat-card">
-            <div className="number">{stats.studyStreak}</div>
-            <div className="label">Day Streak</div>
+            <div className="number">{stats.categoriesCompleted.length}</div>
+            <div className="label">Categories Mastered</div>
           </div>
         </div>
+
+        <div style={{ marginTop: '24px' }}>
+          <div className="progress-bar" style={{ height: '32px' }}>
+            <div
+              className="progress-fill"
+              style={{ width: `${((stats.totalXP % 100) / 100) * 100}%` }}
+            >
+              {stats.totalXP % 100}/100 XP to Level {stats.level + 1}
+            </div>
+          </div>
+        </div>
+
+        {mistakes.length > 0 && (
+          <div style={{ marginTop: '32px', padding: '24px', background: '#fff3cd', borderRadius: '12px', border: '2px solid #ffc107' }}>
+            <h3 style={{ marginBottom: '16px', color: '#856404' }}>Recent Mistakes (Review These!)</h3>
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {mistakes.slice(0, 10).map((mistake, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: '12px',
+                    background: 'white',
+                    borderRadius: '8px',
+                    marginBottom: '8px',
+                    borderLeft: '4px solid #dc3545'
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold', color: '#2d3748' }}>{mistake.word}</div>
+                  <div style={{ color: '#dc3545', fontSize: '0.9rem', marginTop: '4px' }}>
+                    You answered: {mistake.userAnswer}
+                  </div>
+                  <div style={{ color: '#28a745', fontSize: '0.9rem' }}>
+                    Correct answer: {mistake.correctAnswer}
+                  </div>
+                  <div style={{ color: '#718096', fontSize: '0.8rem', marginTop: '4px' }}>
+                    {mistake.category} • {new Date(mistake.timestamp).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ marginTop: '32px', padding: '24px', background: '#f7fafc', borderRadius: '12px' }}>
           <h3 style={{ marginBottom: '16px' }}>Learning Tips</h3>
@@ -82,7 +116,7 @@ export default function ProgressTracker({ onBack }) {
         </div>
 
         <div style={{ marginTop: '24px', textAlign: 'center' }}>
-          <button onClick={resetProgress} className="danger">
+          <button onClick={handleReset} className="danger">
             Reset All Progress
           </button>
         </div>

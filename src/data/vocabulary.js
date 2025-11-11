@@ -1,3 +1,5 @@
+import { vocabularyA2Extended } from './vocabularyA2Extended.js';
+
 export const vocabulary = {
   basics: {
     title: "Basics",
@@ -232,8 +234,11 @@ export const vocabulary = {
   }
 };
 
+// Merge with extended A2 vocabulary
+export const allVocabulary = { ...vocabulary, ...vocabularyA2Extended };
+
 export const getAllWords = () => {
-  return Object.values(vocabulary).flatMap(category =>
+  return Object.values(allVocabulary).flatMap(category =>
     category.words.map(word => ({ ...word, category: category.title }))
   );
 };
@@ -245,5 +250,5 @@ export const getRandomWords = (count = 10) => {
 };
 
 export const getWordsByCategory = (categoryKey) => {
-  return vocabulary[categoryKey]?.words || [];
+  return allVocabulary[categoryKey]?.words || [];
 };

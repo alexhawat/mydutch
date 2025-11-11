@@ -2,36 +2,50 @@ import { useState, useEffect } from 'react';
 import { speak } from '../utils/audio';
 import { updateQuizProgress, addMistake } from '../utils/progress';
 
-export default function Quiz({ words, onComplete, category = 'General' }) {
+export default function ListeningQuiz({ words, onComplete, category = 'General' }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [quizWords, setQuizWords] = useState([]);
   const [xpEarned, setXpEarned] = useState(0);
+  const [hasPlayedAudio, setHasPlayedAudio] = useState(false);
 
   useEffect(() => {
-    // Prepare quiz questions
     const quiz = words.slice(0, 10).map(word => {
-      // Get 3 random wrong answers
       const wrongAnswers = words
-        .filter(w => w.english !== word.english)
+        .filter(w => w.dutch !== word.dutch)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3)
-        .map(w => w.english);
+        .map(w => w.dutch);
 
-      // Combine with correct answer and shuffle
-      const options = [...wrongAnswers, word.english].sort(() => Math.random() - 0.5);
+      const options = [...wrongAnswers, word.dutch].sort(() => Math.random() - 0.5);
 
       return {
         ...word,
         options,
-        correctAnswer: word.english
+        correctAnswer: word.dutch
       };
     });
 
     setQuizWords(quiz);
   }, [words]);
+
+  useEffect(() => {
+    // Auto-play audio when question loads
+    if (quizWords.length > 0 && !hasPlayedAudio) {
+      setTimeout(() => {
+        playAudio();
+        setHasPlayedAudio(true);
+      }, 500);
+    }
+  }, [currentQuestion, quizWords]);
+
+  const playAudio = () => {
+    if (quizWords[currentQuestion]) {
+      speak(quizWords[currentQuestion].dutch);
+    }
+  };
 
   const handleAnswer = (answer) => {
     setSelectedAnswer(answer);
@@ -41,7 +55,6 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
     if (isCorrect) {
       setScore(score + 1);
     } else {
-      // Track mistake
       addMistake(currentWord.dutch, category, answer, currentWord.correctAnswer);
     }
 
@@ -49,17 +62,14 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
       if (currentQuestion < quizWords.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
         setSelectedAnswer(null);
+        setHasPlayedAudio(false);
       } else {
-        // Quiz complete - update progress
-        const stats = updateQuizProgress(quizWords.length, score + (isCorrect ? 1 : 0), category);
-        setXpEarned((score + (isCorrect ? 1 : 0)) * 10);
+        const finalScore = score + (isCorrect ? 1 : 0);
+        updateQuizProgress(quizWords.length, finalScore, category);
+        setXpEarned(finalScore * 15); // More XP for listening
         setShowResult(true);
       }
     }, 1500);
-  };
-
-  const playQuestionAudio = () => {
-    speak(quizWords[currentQuestion].dutch);
   };
 
   if (quizWords.length === 0) {
@@ -70,7 +80,7 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
     const percentage = Math.round((score / quizWords.length) * 100);
     return (
       <div className="card" style={{ textAlign: 'center' }}>
-        <h2>Quiz Complete!</h2>
+        <h2>Listening Quiz Complete! 🎧</h2>
         <div style={{ fontSize: '4rem', margin: '24px 0' }}>
           {percentage >= 80 ? '🎉' : percentage >= 60 ? '👏' : '💪'}
         </div>
@@ -91,11 +101,13 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
             {percentage}%
           </div>
         </div>
-        <div style={{ marginTop: '32px' }}>
-          {percentage >= 80 && <p style={{ fontSize: '1.2rem', color: '#28a745' }}>Excellent work! 🌟</p>}
-          {percentage >= 60 && percentage < 80 && <p style={{ fontSize: '1.2rem', color: '#667eea' }}>Good job! Keep practicing! 📚</p>}
-          {percentage < 60 && <p style={{ fontSize: '1.2rem', color: '#dc3545' }}>Keep studying! You'll get there! 💪</p>}
+
+        <div style={{ marginTop: '24px' }}>
+          <p style={{ color: '#667eea', marginBottom: '16px' }}>
+            Great work on your listening skills! 👂
+          </p>
         </div>
+
         <button onClick={onComplete} style={{ marginTop: '24px' }}>
           Back to Menu
         </button>
@@ -114,30 +126,47 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
         <div className="progress-bar">
           <div
             className="progress-fill"
-            style={{ width: `${((currentQuestion) / quizWords.length) * 100}%` }}
+            style={{ width: `${(currentQuestion / quizWords.length) * 100}%` }}
           />
         </div>
       </div>
 
-      <div style={{ textAlign: 'center' }}>
-        <h2 style={{ fontSize: '2.5rem', margin: '32px 0' }}>
-          {question.dutch}
-        </h2>
+      <div style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '48px',
+        borderRadius: '16px',
+        textAlign: 'center',
+        marginBottom: '32px',
+        color: 'white'
+      }}>
+        <h3 style={{ color: 'white', marginBottom: '24px' }}>🎧 Listen and Choose</h3>
         <button
-          onClick={playQuestionAudio}
-          className="audio-button"
-          style={{ fontSize: '2rem', background: 'transparent', padding: '8px', marginBottom: '16px' }}
+          onClick={playAudio}
+          style={{
+            fontSize: '4rem',
+            background: 'rgba(255,255,255,0.2)',
+            padding: '24px',
+            borderRadius: '50%',
+            border: '4px solid white',
+            cursor: 'pointer',
+            transition: 'transform 0.3s ease'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           title="Play audio"
         >
           🔊
         </button>
+        <p style={{ marginTop: '16px', fontSize: '1.1rem', opacity: 0.9 }}>
+          Click to play audio
+        </p>
       </div>
 
-      <p style={{ textAlign: 'center', color: '#718096', marginBottom: '32px' }}>
-        What does this mean in English?
+      <p style={{ textAlign: 'center', color: '#667eea', marginBottom: '24px', fontWeight: '600', fontSize: '1.1rem' }}>
+        What did you hear?
       </p>
 
-      <div>
+      <div style={{ display: 'grid', gap: '12px' }}>
         {question.options.map((option, index) => (
           <div
             key={index}
@@ -151,8 +180,10 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
             onClick={() => !selectedAnswer && handleAnswer(option)}
             style={{
               cursor: selectedAnswer ? 'default' : 'pointer',
-              fontSize: '1.2rem',
-              fontWeight: '500'
+              fontSize: '1.3rem',
+              fontWeight: '500',
+              textAlign: 'center',
+              padding: '20px'
             }}
           >
             {option}
@@ -161,6 +192,25 @@ export default function Quiz({ words, onComplete, category = 'General' }) {
           </div>
         ))}
       </div>
+
+      {selectedAnswer && (
+        <div style={{
+          marginTop: '24px',
+          padding: '16px',
+          background: selectedAnswer === question.correctAnswer ? '#d4edda' : '#f8d7da',
+          borderRadius: '8px',
+          textAlign: 'center'
+        }}>
+          <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+            English: {question.english}
+          </p>
+          {question.example && (
+            <p style={{ fontSize: '0.9rem', fontStyle: 'italic', color: '#4a5568' }}>
+              Example: "{question.example}"
+            </p>
+          )}
+        </div>
+      )}
 
       <div style={{ marginTop: '24px', textAlign: 'center', color: '#667eea', fontWeight: '600' }}>
         Score: {score}/{currentQuestion + (selectedAnswer ? 1 : 0)}

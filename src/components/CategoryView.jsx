@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import Flashcard from './Flashcard';
 import Quiz from './Quiz';
+import FillInBlankQuiz from './FillInBlankQuiz';
+import ListeningQuiz from './ListeningQuiz';
 
 export default function CategoryView({ category, onBack }) {
-  const [mode, setMode] = useState('menu'); // menu, flashcards, quiz, vocabulary
+  const [mode, setMode] = useState('menu'); // menu, flashcards, quiz, fillblank, listening, vocabulary
   const [currentCard, setCurrentCard] = useState(0);
 
   const handleNext = () => {
@@ -46,7 +48,29 @@ export default function CategoryView({ category, onBack }) {
         <button onClick={handleBackToMenu} className="back-button secondary">
           ← Back to {category.title}
         </button>
-        <Quiz words={category.words} onComplete={handleBackToMenu} />
+        <Quiz words={category.words} onComplete={handleBackToMenu} category={category.title} />
+      </div>
+    );
+  }
+
+  if (mode === 'fillblank') {
+    return (
+      <div>
+        <button onClick={handleBackToMenu} className="back-button secondary">
+          ← Back to {category.title}
+        </button>
+        <FillInBlankQuiz words={category.words} onComplete={handleBackToMenu} category={category.title} />
+      </div>
+    );
+  }
+
+  if (mode === 'listening') {
+    return (
+      <div>
+        <button onClick={handleBackToMenu} className="back-button secondary">
+          ← Back to {category.title}
+        </button>
+        <ListeningQuiz words={category.words} onComplete={handleBackToMenu} category={category.title} />
       </div>
     );
   }
@@ -119,7 +143,13 @@ export default function CategoryView({ category, onBack }) {
             📇 Study with Flashcards
           </button>
           <button onClick={() => setMode('quiz')} className="success">
-            ✏️ Take a Quiz
+            ✏️ Multiple Choice Quiz
+          </button>
+          <button onClick={() => setMode('fillblank')} className="success">
+            📝 Fill in the Blank Quiz
+          </button>
+          <button onClick={() => setMode('listening')} className="success">
+            🎧 Listening Quiz
           </button>
           <button onClick={() => setMode('vocabulary')} className="secondary">
             📚 View All Words
