@@ -1,349 +1,303 @@
 # MyDutch 🇳🇱
 
-An interactive **A2-level Dutch language learning application** specifically designed for **inburgering exam preparation**. Built with React and Vite.
+A **full-stack Dutch language learning application** for A2 inburgering exam preparation. Built with React, FastAPI, Cloudflare R2, and Cloudflare Workers AI.
 
-## 🎯 Inburgering Focused
+## 🎯 Features
 
-This app is tailored for the Dutch civic integration (inburgering) exam at A2 CEFR level, covering all essential topics and skills needed to pass.
+### 🔐 User Authentication
+- Email/password registration and login
+- JWT-based authentication with refresh tokens
+- OAuth integration ready (Google, GitHub)
+- Protected routes and secure sessions
 
-## Features
+### 📚 Comprehensive Learning Content
+- **16+ vocabulary categories** with 600+ words
+- **8 grammar lessons** covering A2-level Dutch
+- Interactive flashcards with audio playback
+- Multiple quiz types (multiple choice, fill-in-blank, listening)
+- Real-world example sentences
 
-### 📚 Extensive A2-Level Vocabulary
-- **16+ Categories**: Basics, Numbers, Food & Drinks, Family, Colors, Weather, Time, Common Verbs, Places, Question Words, **Housing & Living, Healthcare & Medical, Work & Employment, Education & School, Transport & Travel, Shopping & Services, Government & Society**
-- **600+ Words**: Each with English translation, pronunciation guide, and practical example sentences
-- Focus on real-world situations you'll encounter in the Netherlands
-- Organized by topic for systematic learning
+### 💬 AI Conversation Partner
+- Powered by Cloudflare Workers AI
+- Dutch conversation practice with real-time corrections
+- Grammar explanations and tips
+- Context-aware responses
+- Mistake highlighting
 
-### 📇 Interactive Flashcards with Audio
-- Click to flip between Dutch and English
-- **🔊 Audio playback** for every word and example sentence (text-to-speech)
-- Pronunciation guides in IPA-style notation
-- Context-rich example sentences
-- Navigate through cards at your own pace
+### 📊 Progress Tracking
+- Cross-device sync via Cloudflare R2
+- XP and leveling system
+- Study streak tracking
+- Mistake logging and review
+- Category mastery tracking
 
-### ✏️ Multiple Quiz Types
-- **Multiple Choice Quiz**: Test vocabulary recognition with 4 options
-- **📝 Fill in the Blank Quiz**: Complete sentences with correct Dutch words
-- **🎧 Listening Quiz**: Audio-based comprehension (listen and identify)
-- Instant feedback with visual indicators
-- **XP Rewards**: Earn 10-15 XP per correct answer
-- Randomized questions for effective learning
-
-### 💬 Conversation Partner
-- **AI-powered Dutch chat partner** for conversation practice
-- Real-time corrections on grammar and sentence structure
-- Common topics: greetings, work, daily activities, weather
-- Toggle translations on/off to adjust difficulty
-- Learn natural conversation patterns used by native speakers
-
-### 📖 Grammar Lessons
-- 8 comprehensive grammar lessons covering:
-  - Dutch Pronunciation Guide
-  - Personal Pronouns
-  - Present Tense Verbs
-  - Word Order (critical for A2!)
-  - Articles (De & Het)
-  - Common Conversation Phrases
-  - Plural Nouns
-  - Separable Verbs
-- Clear examples and practical usage tips
-- Progressive difficulty (Beginner to Intermediate)
-
-### 📊 Advanced Progress Tracking
-- **Level System**: Level up every 100 XP earned
-- **XP Tracking**: Earn points for completing quizzes and activities
-- **Study Streak**: Track consecutive days of practice 🔥
-- **Mistake Tracker**: Review your 10 most recent errors
-- **Accuracy Percentage**: Monitor your overall performance
-- **Categories Mastered**: Track which topics you've completed (80%+ accuracy)
-- Visual progress bars showing advancement to next level
-- Personalized learning tips
-
-### 🔊 Comprehensive Audio Features
-- Text-to-speech for all Dutch words and sentences
+### 🔊 Audio Features
+- Text-to-speech for all vocabulary
 - Listening comprehension exercises
-- Practice pronunciation with native-like audio
-- Audio available in flashcards, quizzes, and conversation partner
+- Pronunciation practice
 
-### 🎮 Gamification Elements
-- **Level System**: Start at Level 1, advance as you learn
-- **XP System**:
-  - 10 XP per correct multiple choice answer
-  - 10 XP per fill-in-blank answer
-  - 15 XP per listening quiz answer (bonus for harder tasks)
-- **Daily Streaks**: Maintain consistency with streak tracking
-- **Achievement System**: Master categories by scoring 80%+
-- Visual feedback and celebratory animations
+## 🏗️ Architecture
 
-### ⚡ Quick Access Features
-- **Quick Quiz Button**: Instant random quiz from all categories
-- **Shortcuts on Home Page**: One-click access to key features
-- **Live Stats Display**: See your level, XP, and streak on the home screen
+### Frontend
+- **React 18** - UI framework
+- **Vite** - Build tool and dev server
+- **React Router** - Client-side routing
+- **Context API** - State management
+- **Web Speech API** - Text-to-speech
 
-### 🎨 Beautiful, Modern UI
-- Gradient design with purple/blue theme matching Dutch flag colors
-- Smooth animations and transitions
-- Fully responsive (desktop, tablet, mobile)
-- Intuitive navigation
-- Accessible design patterns
+### Backend
+- **Python 3.11** - Programming language
+- **UV** - Fast Python package manager
+- **FastAPI** - Web framework
+- **PostgreSQL 16** - User account database
+- **SQLAlchemy** - ORM
+- **Alembic** - Database migrations
 
-## Getting Started
+### Storage & AI
+- **Cloudflare R2** - Object storage (S3-compatible)
+  - Public bucket: Learning content (vocabulary, grammar)
+  - Private bucket: User progress and chat history
+- **Cloudflare Workers AI** - Chat conversation partner
+- **Presigned URLs** - Secure private file access
+
+### DevOps
+- **Docker & Docker Compose** - Containerization
+- **GitHub Actions** - CI/CD pipeline
+- **GitHub Pages** - Frontend deployment
+- **Pytest** - Backend testing
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (version 16 or higher)
-- npm or yarn
-- Modern web browser with Web Speech API support (Chrome, Edge, Safari)
+- **Docker & Docker Compose** (recommended)
+- OR: Python 3.11+, Node.js 20+, PostgreSQL 16
 
-### Installation
+### Option 1: Docker (Recommended)
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/alexhawat/mydutch
+# Clone the repository
+git clone https://github.com/alexhawat/mydutch.git
 cd mydutch
+
+# Copy environment files
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+
+# Edit .env files with your configuration
+nano backend/.env
+
+# Start all services
+make dev
+
+# Access the application
+# Frontend: http://localhost:5173
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
 ```
 
-2. Install dependencies:
+### Option 2: Manual Setup
+
+#### Backend Setup
+
 ```bash
+cd backend
+
+# Install UV
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -e .
+
+# Set up database (PostgreSQL must be running)
+alembic upgrade head
+
+# Run development server
+uvicorn app.main:app --reload
+```
+
+#### Frontend Setup
+
+```bash
+cd frontend
+
+# Install dependencies
 npm install
-```
 
-3. Start the development server:
-```bash
+# Run development server
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+## 📝 Environment Variables
 
-### Building for Production
+### Backend (.env)
 
-To create a production build:
+```env
+# Database
+DATABASE_URL=postgresql://mydutch:mydutch@localhost:5432/mydutch
+
+# JWT
+JWT_SECRET_KEY=your-secret-key-change-in-production
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
+JWT_REFRESH_TOKEN_EXPIRE_DAYS=7
+
+# Cloudflare R2
+R2_ACCOUNT_ID=your-account-id
+R2_ACCESS_KEY_ID=your-access-key
+R2_SECRET_ACCESS_KEY=your-secret-key
+R2_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com
+R2_CONTENT_BUCKET=mydutch-content
+R2_USER_DATA_BUCKET=mydutch-user-data
+
+# Cloudflare Workers AI
+CF_ACCOUNT_ID=your-account-id
+CF_API_TOKEN=your-api-token
+CF_AI_MODEL=@cf/meta/llama-2-7b-chat-int8
+
+# OAuth (optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+### Frontend (.env)
+
+```env
+VITE_API_URL=http://localhost:8000
+VITE_R2_PUBLIC_URL=https://pub-xxx.r2.dev
+```
+
+## 🛠️ Development
+
+### Available Commands (Makefile)
+
 ```bash
+make help          # Show all available commands
+make setup         # Initial project setup
+make dev           # Start development environment
+make build         # Build all Docker images
+make test-backend  # Run backend tests
+make test-frontend # Run frontend tests
+make migrate       # Run database migrations
+make logs          # View all service logs
+make clean         # Stop and remove all containers
+```
+
+### Running Tests
+
+```bash
+# Backend tests
+cd backend
+source .venv/bin/activate
+pytest -v
+
+# Frontend build test
+cd frontend
 npm run build
 ```
 
-To preview the production build:
+### Code Quality
+
 ```bash
-npm run preview
+# Backend linting
+cd backend
+source .venv/bin/activate
+black app/
+ruff check app/
+mypy app/
 ```
 
-## How to Use - Inburgering Study Path
+## 📚 API Documentation
 
-### Recommended Learning Sequence
+Once the backend is running, visit:
+- **Interactive API docs**: http://localhost:8000/docs
+- **Alternative docs**: http://localhost:8000/redoc
 
-1. **Start with Basics** (Week 1)
-   - Master greetings, common phrases, and basic conversation
-   - Use flashcards with audio to learn pronunciation
-   - Take the multiple choice quiz until 80%+ accuracy
+### Key Endpoints
 
-2. **Essential Categories** (Weeks 2-4)
-   - **Housing**: Learn rental, address, and living situation vocabulary
-   - **Healthcare**: Medical terms, appointments, insurance
-   - **Work**: Job applications, contracts, workplace vocabulary
-   - Use all three quiz types for each category
+#### Authentication
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login
+- `POST /api/v1/auth/refresh` - Refresh access token
+- `GET /api/v1/auth/me` - Get current user
 
-3. **Daily Life Categories** (Weeks 5-6)
-   - **Transport**: Public transport, travel, directions
-   - **Shopping**: Purchases, prices, services
-   - **Education**: If you have children or plan to study
+#### Content
+- `GET /api/v1/content/vocabulary` - Get all vocabulary
+- `GET /api/v1/content/grammar` - Get grammar lessons
+- `GET /api/v1/content/progress` - Get user progress
+- `POST /api/v1/content/progress` - Update progress
 
-4. **Government & Society** (Week 7)
-   - Essential for KNS (Knowledge of Dutch Society)
-   - Municipality vocabulary, rights, responsibilities
-   - Laws and regulations
+#### Chat
+- `POST /api/v1/chat/conversation` - Chat with AI partner
+- `POST /api/v1/chat/grammar` - Get grammar explanation
+- `GET /api/v1/chat/history` - Get chat history
 
-5. **Practice & Review** (Week 8+)
-   - Use Quick Quiz daily for mixed practice
-   - Chat with Conversation Partner regularly
-   - Review Mistake Tracker and focus on weak areas
-   - Maintain your streak!
-
-### Study Tips for A2 Inburgering Success
-
-#### Daily Routine
-- **15-30 minutes minimum** to maintain streak
-- Use Quick Quiz for warm-up
-- Study 1-2 categories thoroughly
-- Practice conversation for 5-10 minutes
-- Review mistakes before ending session
-
-#### Effective Learning Strategies
-- **Listen Actively**: Use audio features extensively - listening is 40% of the exam!
-- **Speak Out Loud**: Repeat words after audio playback
-- **Write Sentences**: Practice fill-in-blank to improve writing
-- **Real-World Application**: Use new words when shopping, at doctor, etc.
-- **Consistency Over Intensity**: Daily practice beats weekend marathons
-- **Review Mistakes**: Your error log shows exactly what to study
-- **Track Progress**: Aim for 80%+ accuracy before moving to next category
-- **Set XP Goals**: Try to gain 100+ XP daily (10-15 correct answers)
-
-#### Exam-Specific Prep
-- **Simulate Exam Conditions**: Use listening quiz without translations
-- **Time Yourself**: Practice completing quizzes quickly
-- **Focus on Weak Categories**: Check your mistake tracker patterns
-- **Practice All Skills**: Reading (flashcards), listening (audio quiz), speaking (conversation partner), writing (fill-in-blank)
-
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 mydutch/
-├── src/
-│   ├── components/
-│   │   ├── Flashcard.jsx          # Flashcard component with audio
-│   │   ├── Quiz.jsx               # Multiple choice quiz with XP
-│   │   ├── FillInBlankQuiz.jsx    # Sentence completion quiz
-│   │   ├── ListeningQuiz.jsx      # Audio comprehension quiz
-│   │   ├── ConversationPartner.jsx # AI chat partner with corrections
-│   │   ├── CategoryView.jsx       # Category navigation and modes
-│   │   ├── GrammarView.jsx        # Grammar lessons viewer
-│   │   └── ProgressTracker.jsx    # XP, levels, streaks, mistakes
-│   ├── data/
-│   │   ├── vocabulary.js          # Core vocabulary (10 categories)
-│   │   ├── vocabularyA2Extended.js # A2-level vocabulary (6 categories)
-│   │   └── grammar.js             # 8 grammar lessons
-│   ├── utils/
-│   │   ├── audio.js               # Text-to-speech engine
-│   │   └── progress.js            # XP system, streaks, mistake tracking
-│   ├── App.jsx                    # Main app with routing
-│   ├── main.jsx                   # Entry point
-│   └── index.css                  # Global styles
-├── index.html                     # HTML template
-├── package.json                   # Dependencies
-└── vite.config.js                # Build configuration
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── routers/        # API endpoints
+│   │   ├── models.py       # Database models
+│   │   ├── schemas.py      # Pydantic schemas
+│   │   ├── auth.py         # JWT utilities
+│   │   ├── r2.py           # R2 storage service
+│   │   ├── ai.py           # Cloudflare AI service
+│   │   └── main.py         # FastAPI app
+│   ├── alembic/            # Database migrations
+│   ├── tests/              # Pytest tests
+│   └── pyproject.toml      # UV dependencies
+├── frontend/               # React frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── contexts/       # React contexts
+│   │   ├── services/       # API services
+│   │   ├── utils/          # Utilities
+│   │   └── data/           # Static data
+│   └── package.json        # npm dependencies
+├── docs/                   # Documentation
+├── scripts/                # Utility scripts
+├── .github/workflows/      # CI/CD pipelines
+└── docker-compose.yml      # Docker orchestration
 ```
 
-## Technologies Used
+## 🚢 Deployment
 
-- **React 18**: Modern React with hooks for state management
-- **Vite**: Lightning-fast build tool and dev server
-- **CSS3**: Custom styling with gradients and animations
-- **Web Speech API**: Browser-based text-to-speech for audio
-- **LocalStorage**: Persistent progress, XP, streaks, and mistakes
+### Frontend (GitHub Pages)
+Automatically deployed on push to `main` branch via GitHub Actions.
 
-## Inburgering Exam Coverage
+### Backend
+Configure your preferred hosting:
+- Railway
+- Fly.io
+- Render
+- Cloudflare Workers
+- Any Docker-compatible platform
 
-### Knowledge of Dutch Society (KNS)
-✅ Government and Society vocabulary
-✅ Dutch laws and civic responsibilities
-✅ Rights and obligations
+## 📖 Learning Resources
 
-### Reading Comprehension
-✅ Housing contracts and rental terms
-✅ Healthcare and medical information
-✅ Work contracts and employment
-✅ Government communications
-✅ Daily life situations
+- [Official Inburgering Website](https://www.inburgeren.nl/)
+- [A2 Dutch CEFR Level](https://www.coe.int/en/web/common-european-framework-reference-languages/level-descriptions)
+- [Dutch Grammar Guide](https://www.dutchgrammar.com/)
 
-### Listening Comprehension
-✅ Listening quiz with audio playback
-✅ Conversation partner practice
-✅ Audio for all 600+ words
-✅ Example sentences with native pronunciation
+## 🤝 Contributing
 
-### Speaking Skills
-✅ Conversation partner for dialogue practice
-✅ Example sentences for common scenarios
-✅ Pronunciation guides for all words
-✅ Audio to model correct pronunciation
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Writing Skills
-✅ Fill-in-blank exercises for sentence construction
-✅ Grammar lessons for correct structure
-✅ Example sentences showing proper usage
+## 📄 License
 
-## Customization
+This project is open source and available under the MIT License.
 
-### Adding New Words
+## 🙏 Acknowledgments
 
-Edit `src/data/vocabularyA2Extended.js`:
-
-```javascript
-{
-  dutch: "Nieuw woord",
-  english: "New word",
-  pronunciation: "NEW vort",
-  example: "Dit is een nieuw woord in een zin."
-}
-```
-
-### Adding Grammar Lessons
-
-Edit `src/data/grammar.js`:
-
-```javascript
-{
-  id: 9,
-  title: "Your Lesson Title",
-  level: "Beginner",
-  content: `## Your Content Here`,
-  examples: [
-    { dutch: "Example", english: "Translation" }
-  ]
-}
-```
-
-## Tips for Exam Success
-
-### Before the Exam
-1. Complete all 16 categories with 80%+ accuracy
-2. Maintain a 7-day streak leading up to exam
-3. Reach at least Level 5 (500 XP)
-4. Review all mistakes in tracker
-5. Practice conversation partner daily for a week
-
-### During the Exam
-1. Read/listen to questions carefully
-2. Eliminate obviously wrong answers first
-3. Use context clues in sentences
-4. Manage your time (don't spend too long on one question)
-5. Stay calm - you've practiced!
-
-### After Each Practice Session
-1. Check your XP progress
-2. Review new mistakes added to tracker
-3. Note categories needing more work
-4. Celebrate your streak!
-
-## Contributing
-
-This is an open-source project. Contributions welcome! Ideas for enhancement:
-
-- Additional A2-level vocabulary categories
-- Video pronunciation guides
-- Typing speed exercises
-- Spaced repetition system (SRS)
-- Social features (leaderboards, study groups)
-- Mock inburgering exams
-- Pronunciation scoring with speech recognition
-- More grammar lessons (past tense, future tense)
-- Cultural notes about the Netherlands
-
-## License
-
-Open source - available for personal and educational use.
-
-## Acknowledgments
-
-- Vocabulary curated from A2 CEFR standards and inburgering requirements
-- Grammar content adapted from standard Dutch language pedagogy
-- Pronunciation guides based on standard Dutch phonetics
-- Built with ❤️ for Dutch language learners and immigrants to the Netherlands
-
-## Support
-
-If you encounter issues or have questions:
-- Check browser console for errors
-- Ensure JavaScript is enabled
-- Try a modern browser (Chrome, Edge, Safari)
-- Clear browser cache and reload
+- Built with ❤️ for Dutch language learners
+- Powered by Cloudflare's edge platform
+- Designed for inburgering exam success
 
 ---
 
-## 🎓 Good Luck with Your Inburgering Exam!
-
-**Veel succes met je inburgeringsexamen!**
-
-Remember: Consistency is key. Study a little every day, use all the features, and track your progress. You've got this! 💪
-
----
-
-**Current Status**: Ready for A2-level inburgering preparation with 600+ words, multiple quiz types, conversation practice, and comprehensive progress tracking.
+**Good luck with your Dutch learning journey! Veel succes! 🇳🇱**
