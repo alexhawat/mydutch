@@ -171,3 +171,36 @@ export const contentAPI = {
     return apiRequest(`/api/v1/content/audio/${word}`);
   },
 };
+
+// Chat API (Cloudflare AI)
+export const chatAPI = {
+  async sendMessage(message, conversationHistory = []) {
+    return apiRequest('/api/v1/chat/conversation', {
+      method: 'POST',
+      body: JSON.stringify({
+        message,
+        conversation_history: conversationHistory,
+      }),
+    });
+  },
+
+  async explainGrammar(topic, example = '') {
+    return apiRequest('/api/v1/chat/grammar', {
+      method: 'POST',
+      body: JSON.stringify({
+        topic,
+        example,
+      }),
+    });
+  },
+
+  async getChatHistory() {
+    return apiRequest('/api/v1/chat/history');
+  },
+
+  async clearChatHistory() {
+    return apiRequest('/api/v1/chat/history', {
+      method: 'DELETE',
+    });
+  },
+};
