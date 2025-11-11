@@ -5,6 +5,7 @@ FastAPI server for authentication, R2 access, and AI chat
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
+from app.routers import auth
 
 app = FastAPI(
     title="MyDutch API",
@@ -20,6 +21,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(auth.router)
 
 
 @app.get("/")
@@ -44,7 +48,7 @@ async def api_status():
     return {
         "api_version": "v1",
         "features": {
-            "authentication": "pending",
+            "authentication": "available",
             "r2_storage": "pending",
             "chat_agent": "pending"
         }
