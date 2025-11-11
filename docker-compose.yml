@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: mydutch-db
+    environment:
+      POSTGRES_USER: mydutch
+      POSTGRES_PASSWORD: mydutch
+      POSTGRES_DB: mydutch
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mydutch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mydutch-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: mydutch-backend
+    environment:
+      - DATABASE_URL=postgresql://mydutch:mydutch@db:5432/mydutch
+      - DEBUG=True
+      - ENVIRONMENT=development
+      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000"]
+    volumes:
+      - ./backend/app:/app/app:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - mydutch-network
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # Frontend Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: mydutch-frontend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_R2_PUBLIC_URL=https://mydutch-content.example.com
+    volumes:
+      - ./frontend:/app:delegated
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - mydutch-network
+
+networks:
+  mydutch-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
