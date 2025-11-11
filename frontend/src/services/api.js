@@ -137,3 +137,37 @@ export const progressAPI = {
 };
 
 export { apiRequest };
+
+// Content API (R2-based)
+export const contentAPI = {
+  async getVocabulary() {
+    return apiRequest('/api/v1/content/vocabulary');
+  },
+
+  async getVocabularyCategory(category) {
+    return apiRequest(`/api/v1/content/vocabulary/${category}`);
+  },
+
+  async getGrammar() {
+    return apiRequest('/api/v1/content/grammar');
+  },
+
+  async getGrammarLesson(lesson) {
+    return apiRequest(`/api/v1/content/grammar/${lesson}`);
+  },
+
+  async getUserProgress() {
+    return apiRequest('/api/v1/content/progress');
+  },
+
+  async updateUserProgress(progressData) {
+    return apiRequest('/api/v1/content/progress', {
+      method: 'POST',
+      body: JSON.stringify(progressData),
+    });
+  },
+
+  async getAudioUrl(word) {
+    return apiRequest(`/api/v1/content/audio/${word}`);
+  },
+};
